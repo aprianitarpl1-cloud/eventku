@@ -6,7 +6,8 @@ import { usePathname } from "next/navigation";
 const menu = [
   { href: "/", teks: "Beranda" },
   { href: "/event", teks: "Event" },
-  { href: "/favorit", teks: "Favorit" }, // <-- Ditambahkan di antara "Event" dan "Tentang"
+  { href: "/favorit", teks: "Favorit" },
+  { href: "/pesanan", teks: "Pesanan" }, // <-- Ditambahkan setelah Favorit
   { href: "/tentang", teks: "Tentang" },
   { href: "/kontak", teks: "Kontak" },
 ];
