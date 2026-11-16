@@ -2,7 +2,12 @@ import Link from "next/link";
 import { cookies } from "next/headers";
 import { pesanan } from "@/data/pesanan";
 import { rupiah } from "@/data/events";
-import { batalkanPesanan } from "@/app/actions"; // <-- 1. Impor batalkanPesanan dari actions
+import { batalkanPesanan } from "@/app/actions";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Daftar Pesanan",
+};
 
 export default async function HalamanPesanan() {
   const totalTiket = pesanan.reduce((t, p) => t + p.jumlah, 0);
@@ -39,7 +44,7 @@ export default async function HalamanPesanan() {
                 <th className="p-2">Pemesan</th>
                 <th className="p-2">Tiket</th>
                 <th className="p-2">Total</th>
-                <th className="p-2">Aksi</th> {/* <-- 2. Tambah header kolom aksi */}
+                <th className="p-2">Aksi</th>
               </tr>
             </thead>
             <tbody>
@@ -59,8 +64,6 @@ export default async function HalamanPesanan() {
                     </td>
                     <td className="p-2">{p.jumlah}</td>
                     <td className="p-2">{rupiah(p.total)}</td>
-                    
-                    {/* <-- 3. Tambah kolom form tombol batalkan hanya jika milik Kamu */}
                     <td className="p-2">
                       {milikKamu && (
                         <form action={batalkanPesanan}>
