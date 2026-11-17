@@ -1,3 +1,4 @@
+
 export type Event = {
   id: number;
   judul: string;
@@ -7,7 +8,7 @@ export type Event = {
   harga: number;
   kuota: number;
   terisi: number;
-  gambar?: string;
+  gambar?: string | null;
 };
 
 export const events: Event[] = [
