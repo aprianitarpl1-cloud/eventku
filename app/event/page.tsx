@@ -1,40 +1,91 @@
-
-import Link from "next/link";
+import type { Metadata } from "next";
 import { ambilEvents } from "@/data/ambil";
+import { rupiah } from "@/data/events";
+import {
+  PER_HALAMAN,
+  bacaSaringan,
+  saringEvents,
+} from "@/data/saring";
+import KontrolKatalog from "@/components/KontrolKatalog";
 import KartuEvent from "@/components/KartuEvent";
+import Halaman from "@/components/Halaman";
 
-export default async function Beranda() {
-  const semua = await ambilEvents();
-  const terdekat = semua.slice(0, 3);
+export const metadata: Metadata = {
+  title: "Katalog Event",
+};
+
+export default async function Katalog({
+  searchParams,
+}: PageProps<"/event">) {
+  const s = bacaSaringan(await searchParams);
+  const events = await ambilEvents();
+  const tersusun = saringEvents(events, s);
+
+  const jumlahHalaman = Math.max(
+    1,
+    Math.ceil(tersusun.length / PER_HALAMAN)
+  );
+
+  const hal = Math.min(s.hal, jumlahHalaman);
+
+  const terlihat = tersusun.slice(
+    (hal - 1) * PER_HALAMAN,
+    hal * PER_HALAMAN
+  );
+
+  const daftarKategori = [
+    "Semua",
+    ...new Set(events.map((e) => e.kategori)),
+  ];
+
+  const totalSisa = tersusun.reduce(
+    (t, e) => t + (e.kuota - e.terisi),
+    0
+  );
+
+  const rataHarga =
+    tersusun.length === 0
+      ? 0
+      : Math.round(
+          tersusun.reduce((t, e) => t + e.harga, 0) /
+            tersusun.length
+        );
 
   return (
     <div>
-      <section className="py-12 text-center">
-        <h1 className="text-4xl font-bold">
-          Temukan event seru di sekolahmu
-        </h1>
+      <h1 className="mb-4 text-2xl font-bold">
+        Katalog Event
+      </h1>
 
-        <p className="mt-3 text-slate-600">
-          Workshop, Lomba, Musik, dan Bazar. Pesan tiketnya di sini.
+      {/* Formulir filter katalog */}
+      <KontrolKatalog
+        key={JSON.stringify(s)}
+        s={s}
+        daftarKategori={daftarKategori}
+      />
+
+      <p className="mb-1 text-sm text-slate-500">
+        {tersusun.length} event ditemukan
+      </p>
+
+      <p className="mb-3 text-sm text-slate-500">
+        Rata-rata harga {rupiah(rataHarga)}.
+        Total sisa tiket {totalSisa}
+      </p>
+
+      {terlihat.length === 0 ? (
+        <p className="text-slate-500">
+          Tidak ada event yang cocok.
         </p>
+      ) : (
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {terlihat.map((e) => (
+            <KartuEvent key={e.id} event={e} />
+          ))}
+        </div>
+      )}
 
-        <Link
-          href="/event"
-          className="mt-6 inline-block rounded-lg bg-blue-600 px-5 py-2.5 font-medium text-white hover:bg-blue-700"
-        >
-          Lihat semua event
-        </Link>
-      </section>
-
-      <h2 className="mb-3 text-xl font-semibold">
-        Event terdekat
-      </h2>
-
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {terdekat.map((e) => (
-          <KartuEvent key={e.id} event={e} />
-        ))}
-      </div>
+      <Halaman s={s} hal={hal} jumlah={jumlahHalaman} />
     </div>
   );
 }

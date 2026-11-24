@@ -1,26 +1,30 @@
-
 import Link from "next/link";
+
 import { ambilEvents } from "@/data/ambil";
 import { rupiah } from "@/data/events";
-import { hapusEvent } from "@/app/admin/actions";
 import TombolHapus from "@/components/TombolHapus";
 
 export default async function Admin({
   searchParams,
 }: PageProps<"/admin">) {
   const { info, galat, q } = await searchParams;
+
+  const kataKunci = typeof q === "string" ? q.trim() : "";
+
   const semuaEvents = await ambilEvents();
 
-  const events = semuaEvents.filter((e) =>
-    e.judul.toLowerCase().includes(
-      typeof q === "string" ? q.toLowerCase() : ""
-    )
+  const events = semuaEvents.filter((event) =>
+    event.judul
+      .toLowerCase()
+      .includes(kataKunci.toLowerCase())
   );
 
   return (
     <div>
       <div className="mb-4 flex items-center justify-between">
-        <h1 className="text-2xl font-bold">Kelola Event</h1>
+        <h1 className="text-2xl font-bold">
+          Kelola Event
+        </h1>
 
         <Link
           href="/admin/baru"
@@ -29,22 +33,6 @@ export default async function Admin({
           Tambah event
         </Link>
       </div>
-
-      <form action="/admin" method="GET" className="mb-4">
-        <input
-          type="text"
-          name="q"
-          placeholder="Cari judul event..."
-          defaultValue={typeof q === "string" ? q : ""}
-          className="w-full rounded-lg border p-2"
-        />
-        <button
-          type="submit"
-          className="mt-2 rounded bg-blue-600 px-4 py-2 text-white"
-        >
-          Cari
-        </button>
-      </form>
 
       {typeof info === "string" && (
         <p className="mb-3 rounded bg-green-100 px-3 py-2 text-green-800">
@@ -58,6 +46,37 @@ export default async function Admin({
         </p>
       )}
 
+      {/* Pencarian judul event */}
+      <form
+        action="/admin"
+        method="GET"
+        className="mb-4 flex gap-2"
+      >
+        <input
+          type="search"
+          name="q"
+          defaultValue={kataKunci}
+          placeholder="Cari judul event..."
+          className="w-full rounded border px-3 py-2"
+        />
+
+        <button
+          type="submit"
+          className="rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
+        >
+          Cari
+        </button>
+
+        {kataKunci && (
+          <Link
+            href="/admin"
+            className="rounded border px-4 py-2"
+          >
+            Reset
+          </Link>
+        )}
+      </form>
+
       <table className="w-full rounded-xl border bg-white text-sm">
         <thead className="bg-slate-100 text-left">
           <tr>
@@ -65,35 +84,45 @@ export default async function Admin({
             <th className="p-2">Tanggal</th>
             <th className="p-2">Harga</th>
             <th className="p-2">Terisi</th>
-            <th className="p-2"></th>
+            <th className="p-2">Aksi</th>
           </tr>
         </thead>
 
         <tbody>
-          {events.map((e) => (
-            <tr key={e.id} className="border-t">
-              <td className="p-2">{e.judul}</td>
-              <td className="p-2">{e.tanggal}</td>
-              <td className="p-2">{rupiah(e.harga)}</td>
-              <td className="p-2">
-                {e.terisi}/{e.kuota}
-              </td>
+          {events.length > 0 ? (
+            events.map((e) => (
+              <tr key={e.id} className="border-t">
+                <td className="p-2">{e.judul}</td>
+                <td className="p-2">{e.tanggal}</td>
+                <td className="p-2">{rupiah(e.harga)}</td>
+                <td className="p-2">
+                  {e.terisi}/{e.kuota}
+                </td>
 
-              <td className="flex gap-3 p-2">
-                <Link
-                  href={`/admin/${e.id}/ubah`}
-                  className="text-blue-600 underline"
-                >
-                  Ubah
-                </Link>
+                <td className="p-2">
+                  <div className="flex gap-3">
+                    <Link
+                      href={`/admin/${e.id}/ubah`}
+                      className="text-blue-600 underline"
+                    >
+                      Ubah
+                    </Link>
 
-                <form action={hapusEvent}>
-                  <input type="hidden" name="id" value={e.id} />
-                  <TombolHapus />
-                </form>
+                    <TombolHapus id={e.id} />
+                  </div>
+                </td>
+              </tr>
+            ))
+          ) : (
+            <tr>
+              <td
+                colSpan={5}
+                className="p-4 text-center text-slate-500"
+              >
+                Event tidak ditemukan.
               </td>
             </tr>
-          ))}
+          )}
         </tbody>
       </table>
     </div>

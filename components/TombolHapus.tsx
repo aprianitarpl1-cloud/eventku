@@ -1,18 +1,35 @@
-
 "use client";
 
-export default function TombolHapus() {
+import { hapusEvent } from "@/app/admin/actions";
+
+export default function TombolHapus({
+  id,
+}: {
+  id: number;
+}) {
   return (
-    <button
-      type="submit"
-      onClick={(e) => {
-        if (!window.confirm("Yakin ingin menghapus event ini?")) {
-          e.preventDefault();
-        }
-      }}
-      className="text-red-600 underline"
-    >
-      Hapus
-    </button>
+    <form action={hapusEvent}>
+      <input
+        type="hidden"
+        name="id"
+        value={id}
+      />
+
+      <button
+        type="submit"
+        onClick={(event) => {
+          const yakin = window.confirm(
+            "Apakah kamu yakin ingin menghapus event ini?"
+          );
+
+          if (!yakin) {
+            event.preventDefault();
+          }
+        }}
+        className="text-red-600 underline"
+      >
+        Hapus
+      </button>
+    </form>
   );
 }
